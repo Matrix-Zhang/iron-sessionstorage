@@ -1,20 +1,20 @@
 use std::iter::FromIterator;
 
-use redis;
-use redis::Commands;
+use iron;
 use r2d2;
 use r2d2_redis::RedisConnectionManager;
-use iron;
 use rand;
 use rand::Rng;
+use redis;
+use redis::Commands;
 
+use get_default_cookie;
 use RawSession;
 use SessionBackend;
-use get_default_cookie;
 
+use cookie;
 use errors::*;
 use iron::prelude::*;
-use cookie;
 
 const COOKIE_NAME: &'static str = "iron_session_id";
 

@@ -4,13 +4,13 @@ use cookie;
 use iron;
 use iron::prelude::*;
 
+use get_default_cookie;
 use RawSession;
 use SessionBackend;
-use get_default_cookie;
 
 pub struct SignedCookieSession {
     unsigned_jar: cookie::CookieJar<'static>,
-    cookie_modifier: Option<Arc<Box<Fn(cookie::Cookie) -> cookie::Cookie + Send + Sync>>>
+    cookie_modifier: Option<Arc<Box<Fn(cookie::Cookie) -> cookie::Cookie + Send + Sync>>>,
 }
 
 impl SignedCookieSession {
@@ -42,15 +42,14 @@ impl RawSession for SignedCookieSession {
         debug_assert!(!res.headers.has::<iron::headers::SetCookie>());
         res.headers.set(iron::headers::SetCookie(
             self.jar()
-            .delta()
-            .into_iter()
-            .map(|c| format!("{}", c))
-            .collect()
+                .delta()
+                .into_iter()
+                .map(|c| format!("{}", c))
+                .collect(),
         ));
         Ok(())
     }
 }
-
 
 /// Use signed cookies as session storage. See
 /// http://lucumr.pocoo.org/2013/11/17/my-favorite-database/ for an introduction to this concept.
@@ -62,7 +61,7 @@ impl RawSession for SignedCookieSession {
 /// Note that whatever you write into your session is visible by the user (but not modifiable).
 pub struct SignedCookieBackend {
     signing_key: Arc<Vec<u8>>,
-    cookie_modifier: Option<Arc<Box<Fn(cookie::Cookie) -> cookie::Cookie + Send + Sync + 'static>>>
+    cookie_modifier: Option<Arc<Box<Fn(cookie::Cookie) -> cookie::Cookie + Send + Sync + 'static>>>,
 }
 
 impl SignedCookieBackend {
@@ -73,7 +72,10 @@ impl SignedCookieBackend {
         }
     }
 
-    pub fn set_cookie_modifier<F: Fn(cookie::Cookie) -> cookie::Cookie + Send + Sync + 'static>(&mut self, f: F) {
+    pub fn set_cookie_modifier<F: Fn(cookie::Cookie) -> cookie::Cookie + Send + Sync + 'static>(
+        &mut self,
+        f: F,
+    ) {
         self.cookie_modifier = Some(Arc::new(Box::new(f)));
     }
 }
@@ -96,5 +98,4 @@ impl SessionBackend for SignedCookieBackend {
             cookie_modifier: self.cookie_modifier.clone(),
         }
     }
-
 }
